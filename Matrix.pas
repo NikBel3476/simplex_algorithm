@@ -88,6 +88,8 @@ begin
   
   // вычисление элемента на месте разрешающего элемента
   newMatrix[pivotRow, pivotColumn] := 1 / pivot;
+  
+  self.baseMatrix := newMatrix;
 end;
 
 procedure ExtendedMatrix.DeleteColumn(index: integer);
@@ -97,18 +99,23 @@ end;
 
 function ExtendedMatrix.FindPivotColumnIndex(): integer;
 var
+  currentElement: real;
   maxAbsElement: real := 0.0;
   absElement: real := 0.0;
-  row: integer := self.baseMatrix.GetLength(0) - 1;
+  lastRowIndex: integer := self.baseMatrix.GetLength(0) - 1;
 begin
   for var i := 1 to self.baseMatrix.GetLength(1) - 1 do
   begin
-    absElement := Abs(self.baseMatrix[row, i]);
-    if (absElement > maxAbsElement) then
-    begin  
-      maxAbsElement := absElement;
-      Result := i;
-    end;      
+    currentElement := self.baseMatrix[lastRowIndex, i];
+    if (currentElement < 0) then
+    begin
+      absElement := Abs(self.baseMatrix[lastRowIndex, i]);
+      if (absElement > maxAbsElement) then
+      begin  
+        maxAbsElement := absElement;
+        Result := i;
+      end;       
+    end;     
   end;
 end;
 
@@ -118,7 +125,7 @@ var
   minDivisionResult: real := 0;
   divisionResult: real := 0;
 begin
-  for var i := 0 to self.baseMatrix.GetLength(0) - 2 do
+  for var i := 0 to self.baseMatrix.GetLength(0) - 3 do
   begin
     currentElement := self.baseMatrix[i, pivotColumnIndex];
     if (currentElement <= 0) then

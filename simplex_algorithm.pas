@@ -10,7 +10,7 @@ var
   extendedResultMatrix: ExtendedMatrix;
   tempMatrix: array[,] of real;
   basicElementIndexes: (integer, integer);
-  matrixTransformationCount: integer;
+  matrixTransformationCount: integer := 0;
   matrixExample1 := new real[5, 6] (
     (3.0, 1.0,  -4.0,  2.0,  -5.0, 9.0),
     (6.0, 0.0,  1.0,  -3.0,  4.0, -5.0),
@@ -64,6 +64,13 @@ begin
     var pivotRowIndex := extendedResultMatrix.FindPivotRowIndex(pivotColumnIndex);
     Writeln('Индекс разрешающей строки: ', pivotRowIndex);
     
+    Writeln('Разрешающий элемент: ', extendedResultMatrix.baseMatrix[pivotRowIndex, pivotColumnIndex]);
+    tempMatrix := GaussianElimination(extendedResultMatrix.baseMatrix, (pivotRowIndex, pivotColumnIndex));
+    
+    extendedResultMatrix.baseMatrix := tempMatrix;
+    Writeln('Преобразование ', matrixTransformationCount);
+    extendedResultMatrix.Print();
+    
     var isAllColumnElementsNegative := true;
     for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 2 do
     begin
@@ -80,8 +87,10 @@ begin
       exit;
     end;
     
+    matrixTransformationCount += 1;
+    
     // TODO: remove break;
-    break;
+//    break;
   end;
   
 //  matrixTransformationCount := 0;
