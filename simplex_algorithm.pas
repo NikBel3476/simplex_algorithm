@@ -1,4 +1,5 @@
-﻿uses Matrix;
+﻿uses System;
+uses Matrix;
 
 const
   matrixRowsAmount: integer = 3;
@@ -10,7 +11,7 @@ var
   extendedResultMatrix: ExtendedMatrix;
   tempMatrix: array[,] of real;
   basicElementIndexes: (integer, integer);
-  matrixTransformationCount: integer := 0;
+  matrixTransformationCount: integer := 1;
   matrixExample1 := new real[5, 6] (
     (3.0, 1.0,  -4.0,  2.0,  -5.0, 9.0),
     (6.0, 0.0,  1.0,  -3.0,  4.0, -5.0),
@@ -50,7 +51,7 @@ var
 //  );
 
 begin
-  Console.OutputEncoding := System.Text.Encoding.GetEncoding(866);
+//  Console.OutputEncoding := System.Text.Encoding.GetEncoding(866);
   extendedResultMatrix := extendedMatrixExample1;
   
   Writeln('Исходная матрица');

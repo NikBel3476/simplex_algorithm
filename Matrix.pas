@@ -122,14 +122,16 @@ end;
 function ExtendedMatrix.FindPivotRowIndex(pivotColumnIndex: integer): integer;
 var
   currentElement: real := 0;
-  minDivisionResult: real := 0;
+  minDivisionResult: real := MaxReal;
   divisionResult: real := 0;
 begin
   for var i := 0 to self.baseMatrix.GetLength(0) - 3 do
   begin
     currentElement := self.baseMatrix[i, pivotColumnIndex];
     if (currentElement <= 0) then
+    begin
       continue;
+    end;
     
     divisionResult := self.baseMatrix[i, 0] / currentElement;
     if (divisionResult < minDivisionResult) then
