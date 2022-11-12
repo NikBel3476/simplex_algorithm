@@ -17,11 +17,14 @@ type ExtendedMatrix = record
       Self.rowX := rowX;
       Self.columnX := columnX;
     end;
+    
     procedure Print;
     procedure GaussianElimination(pivotIndexes: (integer, integer));
     procedure DeleteColumn(index: integer);
+    procedure SwapRowAndColumnVariables(rowXIndex: integer; columnXIndex: integer);
     function FindPivotColumnIndex(): integer;
     function FindPivotRowIndex(pivotColumnIndex: integer): integer;
+    function IsAllRowElementsNotNegative(rowIndex: integer): boolean;
 end;
 
 function copyMatrix(matrix: array[,] of real): array[,] of real;
@@ -97,6 +100,15 @@ begin
   
 end;
 
+procedure ExtendedMatrix.SwapRowAndColumnVariables(rowXIndex: integer; columnXIndex: integer);
+var
+  newRowValue: string;
+begin
+  newRowValue := '-' + self.columnX[rowXIndex].Substring(0, self.columnX[rowXIndex].Length - 1);  
+  self.columnX[rowXIndex] := self.rowX[columnXIndex].Substring(1) + '=';
+  self.rowX[columnXIndex] := newRowValue;
+end;
+
 function ExtendedMatrix.FindPivotColumnIndex(): integer;
 var
   currentElement: real;
@@ -138,6 +150,19 @@ begin
     begin
       minDivisionResult := divisionResult;
       Result := i;
+    end;
+  end;
+end;
+
+function ExtendedMatrix.IsAllRowElementsNotNegative(rowIndex: integer): boolean;
+begin
+  Result := true;
+  for var i := 1 to self.baseMatrix.GetLength(1) - 1 do
+  begin
+    if (self.baseMatrix[rowIndex, i] < 0) then
+    begin
+      Result := false;
+      break;
     end;
   end;
 end;
@@ -185,11 +210,15 @@ begin
       end;       
 end;
 
-function gaussianElimination(matrix: array[,] of real; baseElementIndexes: (integer, integer)): array[,] of real;
+function gaussianElimination(
+  matrix: array[,] of real;
+  baseElementIndexes: (integer, integer)
+): array[,] of real;
 var
   baseElementRow: integer;
   baseElementColumn: integer;
   baseElement: real;
+  accuracyNum: real := 0.000001;
 begin
   Result := new real[Length(matrix, 0), Length(matrix, 1)];
   (baseElementRow, baseElementColumn) := baseElementIndexes;
@@ -198,8 +227,7 @@ begin
   // заполнение всей матрицы значениями 1 / разр. эл-т * определитель
   for var i := 0 to Length(matrix, 0) - 1 do
     for var j := 0 to Length(matrix, 1) - 1 do
-      Result[i,j] := det(matrix, i, baseElementRow, j, baseElementColumn) /
-                     baseElement;
+      Result[i,j] := det(matrix, i, baseElementRow, j, baseElementColumn) / baseElement;
 
   // заполнение строки                     
   for var i := 0 to Length(matrix, 1) - 1 do
@@ -211,6 +239,12 @@ begin
   
   // вычисление элемента на месте разрешающего элемента
   Result[baseElementRow, baseElementColumn] := 1 / baseElement;
+  
+  // костыльное округление
+  for var i := 0 to Result.GetLength(0) - 1 do
+    for var j := 0 to Result.GetLength(1) - 1 do
+      if ((Result[i, j] < accuracyNum) and (Result[i, j] > -accuracyNum)) then
+        Result[i, j] := 0;
 end;
 
 function deleteColumn(matrix: array[,] of real; column: integer): array[,] of real;

@@ -6,11 +6,13 @@ const
   matrixColumnsAmount: integer = 4;
 
 var
+  pivotRowIndex: integer;
+  pivotColumnIndex: integer;
   matrix: array[,] of real;
   resultMatrix: array[,] of real;
   extendedResultMatrix: ExtendedMatrix;
   tempMatrix: array[,] of real;
-  basicElementIndexes: (integer, integer);
+  originFuncCoefficients: array of real;
   matrixTransformationCount: integer := 1;
   matrixExample1 := new real[5, 6] (
     (3.0, 1.0,  -4.0,  2.0,  -5.0, 9.0),
@@ -53,25 +55,30 @@ var
 begin
 //  Console.OutputEncoding := System.Text.Encoding.GetEncoding(866);
   extendedResultMatrix := extendedMatrixExample1;
+  originFuncCoefficients := extendedResultMatrix.baseMatrix
+    .Row(extendedResultMatrix.baseMatrix.GetLength(0) - 2).Skip(1).ToArray();
   
   Writeln('Исходная матрица');
   extendedResultMatrix.Print();
   
+  // part 1
   while (true) do
   begin
-    var pivotColumnIndex := extendedResultMatrix.FindPivotColumnIndex();
+    pivotColumnIndex := extendedResultMatrix.FindPivotColumnIndex();
     Writeln('Индекс разрешающего столбца: ', pivotColumnIndex);
     
-    var pivotRowIndex := extendedResultMatrix.FindPivotRowIndex(pivotColumnIndex);
-    Writeln('Индекс разрешающей строки: ', pivotRowIndex);
+    pivotRowIndex := extendedResultMatrix.FindPivotRowIndex(pivotColumnIndex);
+    Writeln('Индекс разрешающей строки: ', pivotRowIndex + 1);
     
     Writeln('Разрешающий элемент: ', extendedResultMatrix.baseMatrix[pivotRowIndex, pivotColumnIndex]);
     tempMatrix := GaussianElimination(extendedResultMatrix.baseMatrix, (pivotRowIndex, pivotColumnIndex));
     
     extendedResultMatrix.baseMatrix := tempMatrix;
+    extendedResultMatrix.SwapRowAndColumnVariables(pivotRowIndex, pivotColumnIndex - 1);
     Writeln('Преобразование ', matrixTransformationCount);
     extendedResultMatrix.Print();
     
+    // поиск отрицательного элемента в столбце. begin
     var isAllColumnElementsNegative := true;
     for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 2 do
     begin
@@ -87,65 +94,101 @@ begin
       Writeln('Нет решений');
       exit;
     end;
+    // поиск отрицательного элемента в столбце. end
+    
+    if (extendedResultMatrix.IsAllRowElementsNotNegative(
+        extendedResultMatrix.baseMatrix.GetLength(0) - 1))
+    then
+      break;
     
     matrixTransformationCount += 1;
-    
-    // TODO: remove break;
-//    break;
+    Writeln('------------------------------------------------------------------');
   end;
   
-//  matrixTransformationCount := 0;
-//  while (true) do
-//  begin
-//    Writeln('Введите индекс разрешающего элемента в формате "i j" (без кавычек)');
-//    basicElementIndexes := readBasicElementIndexes();
-//    Writeln(
-//      'Разрешающий элемент = ',
-//      extendedResultMatrix.baseMatrix[basicElementIndexes[0], basicElementIndexes[1]]
-//    );
-//    
-//    tempMatrix := gaussianElimination(extendedResultMatrix.baseMatrix, basicElementIndexes);
-//    extendedResultMatrix.baseMatrix := deleteColumn(tempMatrix, basicElementIndexes[1]);
-//    
-//    extendedResultMatrix.columnX[basicElementIndexes[0]] := extendedResultMatrix.rowX[basicElementIndexes[1] - 1].Substring(1) + '='; 
-//    extendedResultMatrix.rowX := extendedResultMatrix.rowX
-//                                  .Where((element, i) -> i <> basicElementIndexes[1] - 1).ToArray();
-//    
-//    matrixTransformationCount += 1;
-//    Writeln('Преобразование ', matrixTransformationCount);
-//    extendedResultMatrix.Print();
-//    Writeln('------------------------------------------------------------------');
+  // part 2
+  while (true) do
+  begin
+    // поиск индекса столбца, в котором элемент из строки g равен 0, а из строки f меньше 0. begin
+    pivotColumnIndex := -1;
+    for var i := 1 to extendedResultMatrix.baseMatrix.GetLength(1) - 1 do
+      if (
+        (extendedResultMatrix.baseMatrix[extendedResultMatrix.baseMatrix.GetLength(0) - 1, i] = 0)
+        and (extendedResultMatrix.baseMatrix[extendedResultMatrix.baseMatrix.GetLength(0) - 2, i] < 0)
+      ) then
+      begin
+        pivotColumnIndex := i;
+        break;
+      end;
+    // поиск индекса столбца, в котором элемент из строки g равен 0, а из строки f меньше 0. end
     
-    // проверка найден ли ответ
-    // проверка противоречий
-//    for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 1 do
-//      if (
-//        (extendedResultMatrix.columnX[i] = '0=')
-//        and (rowSum(extendedResultMatrix.baseMatrix, i) - extendedResultMatrix.baseMatrix[i, 0] = 0)
-//        and (extendedResultMatrix.baseMatrix[i, 0] <> 0)
-//      ) then
-//      begin
-//        Writeln('Нет решений');
-//        exit;
-//      end;
+    if (pivotColumnIndex > 0) then
+    begin
+      // поиск отрицательного элемента в столбце. begin
+      var isAllColumnElementsNegative := true;
+      for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 2 do
+      begin
+        if (extendedResultMatrix.baseMatrix[i, pivotColumnIndex] > 0) then
+        begin
+          isAllColumnElementsNegative := false;
+          break;
+        end;
+      end;
       
-//    for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 1 do
-//      if (extendedResultMatrix.columnX[i] = '0=') then
-//      begin
-//        if (rowSum(extendedResultMatrix.baseMatrix, i) = 0) then
-//        begin
-//          Writeln('Ответ:');
-//          printAnswer(extendedResultMatrix);
-//          exit;
-//        end;
-//      end;
-        
-//    if (extendedResultMatrix.baseMatrix.GetLength(1) = 1) then
-//    begin
-//      Writeln('Ответ:');
-//      for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 1 do
-//        Writeln(extendedResultMatrix.columnX[i], ' ', extendedResultMatrix.baseMatrix[i, 0]);
-//      exit;
-//    end; 
-//  end;
+      if (isAllColumnElementsNegative) then
+      begin
+        Writeln('Нет решений');
+        exit;
+      end;
+      // поиск отрицательного элемента в столбце. end
+      
+      Writeln('Индекс разрешающего столбца: ', pivotColumnIndex);
+      
+      pivotRowIndex := extendedResultMatrix.FindPivotRowIndex(pivotColumnIndex);
+      Writeln('Индекс разрешающей строки: ', pivotRowIndex + 1);
+      
+      tempMatrix := gaussianElimination(extendedResultMatrix.baseMatrix, (pivotRowIndex, pivotColumnIndex));
+      extendedResultMatrix.baseMatrix := tempMatrix;
+      extendedResultMatrix.SwapRowAndColumnVariables(pivotRowIndex, pivotColumnIndex - 1);
+      Writeln('Преобразование ', matrixTransformationCount);
+      extendedResultMatrix.Print();
+      
+      matrixTransformationCount += 1;
+      Writeln('------------------------------------------------------------------');
+    end
+    else
+    begin
+      Writeln('Решение:');
+      
+      // исключаем строки g, f и столбец уравнения, поэтому длина - 3
+      var xValues := ArrFill(
+        extendedResultMatrix.baseMatrix.GetLength(0) + extendedResultMatrix.baseMatrix.GetLength(1) - 3,
+        0.0
+      );
+      
+      // обход столбца
+      for var i := 0 to extendedResultMatrix.columnX.Length - 3 do
+      begin
+        var variableName := extendedResultMatrix.columnX[i];
+        var index := StrToInt(variableName.Substring(1, variableName.Length - 2)) - 1;
+        var columnXIndex := extendedResultMatrix.columnX.IndexOf(variableName);
+        xValues[index] := extendedResultMatrix.baseMatrix[i, 0];
+      end;
+      
+      // вывод ответа
+      Write('x = ');
+      for var i := 0 to xValues.Length - 1 do
+      begin
+        Write(xValues[i], '  ');
+      end;
+      Writeln();
+      
+      var answer := 0.0;
+      for var i := 0 to extendedResultMatrix.baseMatrix.ColCount() - 2 do
+        answer += -originFuncCoefficients[i] * xValues[i];
+      
+      Writeln('F(x) = ', answer:0:3);
+      
+      exit;
+    end;
+  end;
 end.
