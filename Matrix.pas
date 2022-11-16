@@ -141,9 +141,7 @@ begin
   begin
     currentElement := self.baseMatrix[i, pivotColumnIndex];
     if (currentElement <= 0) then
-    begin
       continue;
-    end;
     
     divisionResult := self.baseMatrix[i, 0] / currentElement;
     if (divisionResult < minDivisionResult) then

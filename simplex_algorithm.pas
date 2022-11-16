@@ -13,6 +13,7 @@ var
   extendedResultMatrix: ExtendedMatrix;
   tempMatrix: array[,] of real;
   originFuncCoefficients: array of real;
+  
   matrixTransformationCount: integer := 1;
   matrixExample1 := new real[5, 6] (
     (  3.0,  1.0, -4.0,  2.0, -5.0,  9.0),
@@ -55,10 +56,24 @@ var
     rowX: new string[3] ('-x1', '-x2', '-x3');
     columnX: new string[5] ('x4=', 'x5=', 'x6=', 'f=', 'g=');
   );
+  
+  matrixExample4 := new real[4, 6] (
+    ( 1.0, -1.0, -1.0, -2.0, -3.0,  2.0),
+    (-1.0, -1.0,  2.0, -3.0, -2.0,  2.0),
+    ( 0.0,  1.0,  1.0,  2.0,  3.0, -1.0),
+    ( 0.0,  0.0, -1.0,  5.0,  5.0, -4.0)
+  );
+  
+  extendedMatrixExample4: ExtendedMatrix := (
+    baseMatrix: matrixExample4;
+    rowX: new string[5] ('-x1', '-x2', '-x3', '-x4', '-x5');
+    columnX: new string[4] ('x6=', 'x7=', 'f=', 'g=');
+  );
 
 begin
 //  Console.OutputEncoding := System.Text.Encoding.GetEncoding(866);
-  extendedResultMatrix := extendedMatrixExample1;
+  
+  extendedResultMatrix := extendedMatrixExample4;
   
   originFuncCoefficients := extendedResultMatrix.baseMatrix
     .Row(extendedResultMatrix.baseMatrix.GetLength(0) - 2).Skip(1).ToArray();
@@ -71,20 +86,10 @@ begin
   while (true) do
   begin
     pivotColumnIndex := extendedResultMatrix.FindPivotColumnIndex();
-    pivotRowIndex := extendedResultMatrix.FindPivotRowIndex(pivotColumnIndex);
-    Writeln('Индекс разрешающего элемента: (', pivotRowIndex + 1, ', ', pivotColumnIndex, ')');
-    Writeln('Разрешающий элемент: ', extendedResultMatrix.baseMatrix[pivotRowIndex, pivotColumnIndex]);
-    
-    tempMatrix := GaussianElimination(extendedResultMatrix.baseMatrix, (pivotRowIndex, pivotColumnIndex));
-    extendedResultMatrix.baseMatrix := tempMatrix;
-    extendedResultMatrix.SwapRowAndColumnVariables(pivotRowIndex, pivotColumnIndex - 1);
-    
-    Writeln('Преобразование ', matrixTransformationCount);
-    extendedResultMatrix.Print();
     
     // поиск отрицательного элемента в столбце. begin
     var isAllColumnElementsNegative := true;
-    for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 2 do
+    for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 3 do
     begin
       if (extendedResultMatrix.baseMatrix[i, pivotColumnIndex] > 0) then
       begin
@@ -99,6 +104,17 @@ begin
       exit;
     end;
     // поиск отрицательного элемента в столбце. end
+    
+    pivotRowIndex := extendedResultMatrix.FindPivotRowIndex(pivotColumnIndex);
+    Writeln('Индекс разрешающего элемента: (', pivotRowIndex + 1, ', ', pivotColumnIndex, ')');
+    Writeln('Разрешающий элемент: ', extendedResultMatrix.baseMatrix[pivotRowIndex, pivotColumnIndex]);
+    
+    tempMatrix := GaussianElimination(extendedResultMatrix.baseMatrix, (pivotRowIndex, pivotColumnIndex));
+    extendedResultMatrix.baseMatrix := tempMatrix;
+    extendedResultMatrix.SwapRowAndColumnVariables(pivotRowIndex, pivotColumnIndex - 1);
+    
+    Writeln('Преобразование ', matrixTransformationCount);
+    extendedResultMatrix.Print();
     
     if (extendedResultMatrix.IsAllRowElementsNotNegative(
         extendedResultMatrix.baseMatrix.GetLength(0) - 1))
@@ -129,7 +145,7 @@ begin
     begin
       // поиск отрицательного элемента в столбце. begin
       var isAllColumnElementsNegative := true;
-      for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 2 do
+      for var i := 0 to extendedResultMatrix.baseMatrix.GetLength(0) - 3 do
       begin
         if (extendedResultMatrix.baseMatrix[i, pivotColumnIndex] > 0) then
         begin
