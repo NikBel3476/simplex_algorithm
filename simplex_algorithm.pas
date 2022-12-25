@@ -73,6 +73,19 @@ var
     columnX: new string[7] ('x8=', 'x9=', 'x10=', 'x11=', 'x12=', 'f=', 'g=');
   );
   
+  matrixExample5 := new real[4, 5] (
+    (2.0, 1.0, 0.0, 1.0, 0.0),
+    (1.0, 0.0, 1.0, -1.0, 1.0),
+    (0.0, -1.0, -1.0, 0.0, 0.0),
+    (-3.0, -1.0, -1.0, 0.0, -1.0)
+  );
+  
+  extendedMatrixExample5: ExtendedMatrix := (
+    baseMatrix: matrixExample5;
+    rowX: new string[4] ('-x1', '-x2', '-x3', '-x4');
+    columnX: new string[4] ('x5=', 'x6=', 'f=', 'g=');
+  );
+  
 procedure printResult();
 begin
   Writeln('Ответ:');
@@ -113,9 +126,9 @@ begin
 end;
 
 begin
-  Console.OutputEncoding := System.Text.Encoding.GetEncoding(866);
+  // Console.OutputEncoding := System.Text.Encoding.GetEncoding(866);
   
-  extendedResultMatrix := extendedMatrixExample4;
+  extendedResultMatrix := extendedMatrixExample5;
   
   originFuncCoefficients := extendedResultMatrix.baseMatrix
     .Row(extendedResultMatrix.baseMatrix.GetLength(0) - 2).Skip(1).ToArray();
